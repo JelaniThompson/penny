@@ -44,15 +44,15 @@ function onReceiveMessage(env) {
     }
 
     // TODO: Turn this into a nice ol' switch case
-    if (
-      message.text.includes(`<@${env.penny.id}>`) &&
-      message.channel == "C63GFH05V"
-    ) {
+    if (message.text.includes(`<@${env.penny.id}>`)) {
       let responseText = "";
       switch (true) {
         case checkMessage("give prompt"):
-          env.rtm.sendMessage(prompts.getRandom(env), "C63GFH05V");
+          message.channel == "C63GFH05V"
+            ? env.rtm.sendMessage(prompts.getRandom(env), "C63GFH05V")
+            : env.rtm.sendMessage(prompts.getRandom(env), message.channel);
           break;
+
         case checkMessage("submit prompt"):
           let submitPromptText = message.text.substr(27, message.text.length);
 
@@ -62,49 +62,27 @@ function onReceiveMessage(env) {
             fs.writeFileSync("prompts.json", JSON.stringify(json), "utf8");
           });
 
-          env.rtm.sendMessage(
-            `Prompt submitted: ${submitPromptText}`,
-            "C63GFH05V"
-          );
-          console.log(message.channel);
+          message.channel == "C63GFH05V"
+            ? env.rtm.sendMessage(
+                `Prompt submitted: ${submitPromptText}`,
+                "C63GFH05V"
+              )
+            : env.rtm.sendMessage(
+                `Prompt submitted: ${submitPromptText}`,
+                message.channel
+              );
           break;
+
         default:
           responseText =
             "Hi I'm Penny; I can do the following if you `@` mention me!\n";
           responseText += "`@penny_bot give prompt` \n";
           responseText += "`@penny_bot, submit prompt '<your prompt here>'`";
-          env.rtm.sendMessage(responseText, "C63GFH05V");
-      }
-    } else if (
-      message.text.includes(`<@${env.penny.id}>`) &&
-      message.channel != "C63GFH05V"
-    ) {
-      // Check if message is in DM or public channel and post message accordingly
-      let responseText = "";
-      switch (true) {
-        case checkMessage("give prompt"):
-          env.rtm.sendMessage(prompts.getRandom(env), message.channel);
-          break;
-        case checkMessage("submit prompt"):
-          let submitPromptText = message.text.substr(27, message.text.length);
 
-          fs.readFile("prompts.json", "utf8", function(err, data) {
-            let json = JSON.parse(data);
-            json.prompts.push(submitPromptText);
-            fs.writeFileSync("prompts.json", JSON.stringify(json), "utf8");
-          });
-
-          env.rtm.sendMessage(
-            `Prompt submitted: ${submitPromptText}`,
-            message.channel
-          );
-          break;
-        default:
-          responseText =
-            "Hi I'm Penny; I can do the following if you `@` mention me!\n";
-          responseText += "`@penny_bot give prompt` \n";
-          responseText += "`@penny_bot, submit prompt '<your prompt here>'`";
-          env.rtm.sendMessage(responseText, message.channel);
+          // Channel to respond in
+          message.channel == "C63GFH05V"
+            ? env.rtm.sendMessage(responseText, "C63GFH05V")
+            : env.rtm.sendMessage(responseText, message.channel);
       }
     }
   });
